@@ -10,14 +10,19 @@ import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.yb.part4_chapter06.databinding.ActivityMainBinding
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private var cancellationTokenSource: CancellationTokenSource? = null
     private lateinit var binding: ActivityMainBinding
+    private val scope = MainScope()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cancellationTokenSource?.cancel()
+        scope.cancel()
     }
 
     @SuppressLint("MissingPermission")
@@ -46,18 +52,9 @@ class MainActivity : AppCompatActivity() {
                     grantResults[0] == PackageManager.PERMISSION_GRANTED
 
         if (!locationPermissionGranted) {
-            Toast.makeText(this, "접근권한 거절", Toast.LENGTH_SHORT).show()
             finish()
         } else {
-            Toast.makeText(this, "접근권한 허가", Toast.LENGTH_SHORT).show()
-            //TODO FETCH DATA
-            cancellationTokenSource = CancellationTokenSource()
-            fusedLocationProviderClient.getCurrentLocation(
-                LocationRequest.PRIORITY_HIGH_ACCURACY,
-                cancellationTokenSource!!.token
-            ).addOnSuccessListener { location ->
-                binding.textView.text = "${location.latitude}, ${location.longitude}"
-            }
+            fetchAirQualityData()
         }
     }
 
@@ -74,7 +71,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun initVariables() {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+    }
 
+    @SuppressLint("MissingPermission")
+    private fun fetchAirQualityData() {
+        //TODO FETCH DATA
+        cancellationTokenSource = CancellationTokenSource()
+        fusedLocationProviderClient.getCurrentLocation(
+            Priority.PRIORITY_HIGH_ACCURACY,
+//            LocationRequest.PRIORITY_HIGH_ACCURACY,
+            cancellationTokenSource!!.token
+        ).addOnSuccessListener { location ->
+            //API 호출
+            scope.launch {
+
+            }
+            binding.textView.text = "${location.latitude}, ${location.longitude}"
+        }
     }
 
     companion object {
