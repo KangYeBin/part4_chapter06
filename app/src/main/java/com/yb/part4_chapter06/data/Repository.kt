@@ -2,6 +2,7 @@ package com.yb.part4_chapter06.data
 
 import android.util.Log
 import com.yb.part4_chapter06.BuildConfig
+import com.yb.part4_chapter06.data.models.airquality.MeasuredValue
 import com.yb.part4_chapter06.data.models.monitoringstation.MonitoringStation
 import com.yb.part4_chapter06.data.models.tmcoordinates.Document
 import com.yb.part4_chapter06.data.services.AirKoreaApiService
@@ -33,6 +34,14 @@ object Repository {
             ?.minByOrNull { it?.tm ?: Double.MAX_VALUE }
     }
 
+    suspend fun getLatestAirQualityData(stationName: String): MeasuredValue? =
+        airKoreaApiService
+            .getRealtimeAirQualities(stationName)
+            .body()
+            ?.response
+            ?.body
+            ?.measuredValues
+            ?.firstOrNull()
 
     private val kakaoLocalApiService: KakaoLocalApiService by lazy {
         Retrofit.Builder()
