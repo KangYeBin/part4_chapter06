@@ -24,6 +24,6 @@ enum class Grade(
     UNKNOWN("미측정", "🤔", R.color.gray);
 
     override fun toString(): String {
-        return "$label + $emoji"
+        return "$label $emoji"
     }
 }
