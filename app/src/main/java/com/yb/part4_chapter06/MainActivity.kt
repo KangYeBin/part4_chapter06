@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -12,6 +13,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
+import com.yb.part4_chapter06.data.Repository
 import com.yb.part4_chapter06.databinding.ActivityMainBinding
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -31,6 +33,7 @@ class MainActivity : AppCompatActivity() {
 
         requestLocationPermissions()
         initVariables()
+
     }
 
     override fun onDestroy() {
@@ -84,9 +87,11 @@ class MainActivity : AppCompatActivity() {
         ).addOnSuccessListener { location ->
             //API 호출
             scope.launch {
+                val monitoringStation =
+                    Repository.getNearbyMonitoringStation(location.latitude, location.longitude)
 
+                binding.textView.text = monitoringStation?.stationName
             }
-            binding.textView.text = "${location.latitude}, ${location.longitude}"
         }
     }
 
